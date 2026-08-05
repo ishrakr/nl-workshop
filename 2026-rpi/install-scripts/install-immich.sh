@@ -33,14 +33,20 @@ MODEL_CACHE_LOCATION=${install_dir}/model-cache
 DB_PASSWORD=${database_password}
 DB_USERNAME=immich
 DB_DATABASE_NAME=immich
+DB_HOSTNAME=database
 IMMICH_VERSION=release
 EOF
 fi
 
 chmod 600 "${install_dir}/.env"
 cd "${install_dir}"
-docker compose pull
-docker compose up -d
+compose_args=()
+if [[ "${IMMICH_ENABLE_ML:-0}" == '1' ]]; then
+  compose_args+=(--profile ml)
+  printf 'Immich machine learning is enabled and may require additional RAM.\n'
+fi
+docker compose "${compose_args[@]}" pull
+docker compose "${compose_args[@]}" up -d
 
 printf 'Immich is running at http://<raspberry-pi-ip>:2283\n'
 printf 'Configuration: %s/.env\n' "${install_dir}"

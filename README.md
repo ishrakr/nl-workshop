@@ -4,6 +4,8 @@ Installation scripts for the 2026 Raspberry Pi workshop. The commands below use 
 
 Run each command as one line on a Raspberry Pi running Debian or Raspberry Pi OS 64-bit.
 
+The default Compose files are tuned for low-memory systems. Immich machine learning is disabled by default because it is the largest memory consumer. To enable it, run `sudo IMMICH_ENABLE_ML=1 bash install-immich.sh` from the Immich directory. A 1 GB Pi should use at least 1 GB of swap; 2 GB is recommended when running both applications.
+
 ## Docker
 
 ```bash
@@ -19,6 +21,8 @@ sudo mkdir -p /opt/raspberry-pi-workshop/immich && cd /opt/raspberry-pi-workshop
 ```
 
 Immich will be available at `http://<raspberry-pi-ip>:2283`. Photos are stored in `/opt/raspberry-pi-workshop/immich/library`.
+
+Immich's machine-learning features are disabled by default to reduce RAM usage. Face recognition, smart search, and similar features will not be available unless the ML profile is enabled.
 
 ## Nextcloud
 

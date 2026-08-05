@@ -12,20 +12,25 @@ services:
     depends_on:
       - redis
       - database
+    mem_limit: 512m
     restart: unless-stopped
 
   immich-machine-learning:
+    profiles: ["ml"]
     container_name: immich_machine_learning
     image: ghcr.io/immich-app/immich-machine-learning:${IMMICH_VERSION:-release}
     env_file:
       - .env
     volumes:
       - ${MODEL_CACHE_LOCATION}:/cache
+    mem_limit: 1g
     restart: unless-stopped
 
   redis:
     container_name: immich_redis
     image: docker.io/redis:7-alpine
+    command: redis-server --save "" --appendonly no --maxmemory 48mb --maxmemory-policy allkeys-lru
+    mem_limit: 64m
     restart: unless-stopped
 
   database:
@@ -38,5 +43,7 @@ services:
       POSTGRES_INITDB_ARGS: --data-checksums
     volumes:
       - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
-    shm_size: 128mb
+    command: postgres -c shared_buffers=64MB -c effective_cache_size=128MB -c work_mem=2MB -c maintenance_work_mem=32MB -c max_connections=20
+    mem_limit: 256m
+    shm_size: 64mb
     restart: unless-stopped
