@@ -43,7 +43,7 @@ services:
       POSTGRES_INITDB_ARGS: --data-checksums
     volumes:
       - ${DB_DATA_LOCATION}:/var/lib/postgresql/data
-    command: postgres -c shared_buffers=64MB -c effective_cache_size=128MB -c work_mem=2MB -c maintenance_work_mem=32MB -c max_connections=20
+    command: postgres -c shared_preload_libraries=vchord -c shared_buffers=64MB -c effective_cache_size=128MB -c work_mem=2MB -c maintenance_work_mem=32MB -c max_connections=20
     mem_limit: 256m
     shm_size: 64mb
     restart: unless-stopped

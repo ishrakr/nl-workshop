@@ -24,6 +24,12 @@ Immich will be available at `http://<raspberry-pi-ip>:2283`. Photos are stored i
 
 Immich's machine-learning features are disabled by default to reduce RAM usage. Face recognition, smart search, and similar features will not be available unless the ML profile is enabled.
 
+If Immich is already installed, update its Compose file and restart PostgreSQL:
+
+```bash
+cd /opt/raspberry-pi-workshop/immich && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/docker-compose-immich.yml -o docker-compose.yml && sudo docker compose up -d --force-recreate database && sudo docker compose up -d
+```
+
 ## Nextcloud
 
 ```bash
