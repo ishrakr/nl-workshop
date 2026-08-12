@@ -38,6 +38,22 @@ sudo mkdir -p /opt/raspberry-pi-workshop/nextcloud && cd /opt/raspberry-pi-works
 
 Nextcloud will be available at `http://<raspberry-pi-ip>:8080`. The generated administrator credentials are stored in `/opt/raspberry-pi-workshop/nextcloud/.env`.
 
+## Browser GUI
+
+This installs a low-memory noVNC container that shares the Pi's existing X11 desktop in a browser. The Pi must be logged in to its graphical desktop and configured to use X11 rather than Wayland.
+
+```bash
+sudo mkdir -p /opt/raspberry-pi-workshop/web-vnc && cd /opt/raspberry-pi-workshop/web-vnc && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-web-vnc.sh -o install-web-vnc.sh && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/docker-compose-web-vnc.yml -o docker-compose-web-vnc.yml && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/Dockerfile-web-vnc -o Dockerfile-web-vnc && sudo bash install-web-vnc.sh
+```
+
+Open `http://<raspberry-pi-ip>:6080/vnc.html?autoconnect=1&resize=scale`.
+
+This service intentionally has no authentication. Anyone who can reach port `6080` can view and control the Pi. Use it only on a trusted, isolated workshop network and stop it when it is not needed:
+
+```bash
+cd /opt/raspberry-pi-workshop/web-vnc && sudo docker compose down
+```
+
 ## Service Commands
 
 Run these commands from the relevant installation directory:

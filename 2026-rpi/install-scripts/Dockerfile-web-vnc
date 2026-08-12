@@ -1,0 +1,8 @@
+FROM debian:bookworm-slim
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends novnc websockify x11vnc \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html
+
+CMD ["sh", "-c", "x11vnc -display ${DISPLAY:-:0} -auth guess -forever -shared -nopw -localhost -rfbport 5900 -noxdamage -repeat -bg && exec websockify --web=/usr/share/novnc 0.0.0.0:6080 localhost:5900"]
