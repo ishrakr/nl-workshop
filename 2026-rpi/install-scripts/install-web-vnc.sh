@@ -56,7 +56,25 @@ docker compose down --remove-orphans
 docker compose build --no-cache
 docker compose run --rm --no-deps --entrypoint sh web-vnc -c 'command -v xauth >/dev/null'
 docker compose up -d --force-recreate
-docker image prune -f >/dev/null
+
+for _ in {1..10}; do
+  container_status="$(docker inspect --format '{{.State.Status}}' web_vnc 2>/dev/null || true)"
+  [[ "${container_status}" == 'running' ]] && break
+  sleep 1
+done
+
+sleep 3
+container_status="$(docker inspect --format '{{.State.Status}}' web_vnc 2>/dev/null || true)"
+if [[ "${container_status:-}" != 'running' ]]; then
+  printf 'Web VNC failed to start. Recent container logs:\n' >&2
+  docker logs --tail 50 web_vnc >&2 || true
+  exit 1
+fi
+
+while IFS= read -r old_image; do
+  [[ -n "${old_image}" && "${old_image}" != "raspberry-pi-workshop/web-vnc:${image_tag}" ]] || continue
+  docker image rm "${old_image}" >/dev/null 2>&1 || true
+done < <(docker image ls raspberry-pi-workshop/web-vnc --format '{{.Repository}}:{{.Tag}}')
 
 raspberry_pi_ip="$(hostname -I | cut -d ' ' -f 1)"
 printf 'Unauthenticated browser access is available at http://%s:6080/vnc.html?autoconnect=1&resize=scale\n' "${raspberry_pi_ip:-<raspberry-pi-ip>}"
