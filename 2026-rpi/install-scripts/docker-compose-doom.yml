@@ -1,0 +1,10 @@
+services:
+  doom:
+    image: ghcr.io/trisnol/doom-wasm:main
+    platform: linux/amd64
+    container_name: doom
+    ports:
+      - "8081:8000"
+    volumes:
+      - ./doom1.wad:/home/doom/doom-wasm/src/doom1.wad:ro
+    restart: unless-stopped
