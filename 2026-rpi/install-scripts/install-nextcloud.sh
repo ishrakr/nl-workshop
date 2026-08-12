@@ -49,6 +49,25 @@ cd "${install_dir}"
 docker compose pull
 docker compose up -d --remove-orphans
 
+printf 'Waiting for Nextcloud to finish its first-time setup...\n'
+for _ in {1..90}; do
+  container_id="$(docker compose ps -q nextcloud)"
+  if [[ -n "${container_id}" ]] && [[ "$(docker inspect -f '{{.State.OOMKilled}}' "${container_id}")" == true ]]; then
+    printf 'Nextcloud ran out of memory during setup. Ensure at least 1 GB of RAM or swap is available, then rerun this installer.\n' >&2
+    exit 1
+  fi
+
+  if curl -fsS --max-time 5 http://127.0.0.1:8080/status.php 2>/dev/null | grep -q '"installed":true'; then
+    break
+  fi
+  sleep 2
+done
+
+if ! curl -fsS --max-time 5 http://127.0.0.1:8080/status.php 2>/dev/null | grep -q '"installed":true'; then
+  printf 'Nextcloud did not become ready. Check the logs with: sudo docker compose -f %s/docker-compose.yml logs nextcloud\n' "${install_dir}" >&2
+  exit 1
+fi
+
 printf 'Nextcloud is running at http://<raspberry-pi-ip>:8080\n'
 printf 'Admin username: pi\n'
 printf 'Admin password: nlu@2026\n'

@@ -8,10 +8,10 @@ services:
       NEXTCLOUD_ADMIN_USER: pi
       NEXTCLOUD_ADMIN_PASSWORD: nlu@2026
       NEXTCLOUD_TRUSTED_DOMAINS: ${NEXTCLOUD_TRUSTED_DOMAINS}
-      PHP_MEMORY_LIMIT: 128M
+      PHP_MEMORY_LIMIT: 512M
       PHP_UPLOAD_LIMIT: 2G
     volumes:
       - ${NEXTCLOUD_DIR}/html:/var/www/html
       - ${NEXTCLOUD_DIR}/data:/var/www/html/data
-    mem_limit: 512m
+    mem_limit: 1g
     restart: unless-stopped
