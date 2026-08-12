@@ -38,6 +38,14 @@ sudo mkdir -p /opt/raspberry-pi-workshop/nextcloud && cd /opt/raspberry-pi-works
 
 Nextcloud will be available at `http://<raspberry-pi-ip>:8080`. The generated administrator credentials are stored in `/opt/raspberry-pi-workshop/nextcloud/.env`.
 
+## RetroAssembly
+
+```bash
+sudo mkdir -p /opt/raspberry-pi-workshop/retroassembly && cd /opt/raspberry-pi-workshop/retroassembly && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-retroassembly.sh -o install-retroassembly.sh && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/docker-compose-retroassembly.yml -o docker-compose-retroassembly.yml && sudo bash install-retroassembly.sh
+```
+
+RetroAssembly will be available at `http://<raspberry-pi-ip>:8000`. Create an account from the Library page, then upload ROM files that you legally own. Game data, ROMs, and save states are stored in `/opt/raspberry-pi-workshop/retroassembly/data`.
+
 ## Browser GUI
 
 This installs a lightweight Alpine-based noVNC container that shares the Pi's existing X11 desktop in a browser. It works with Raspberry Pi OS Desktop when the Pi is logged in and the desktop uses X11. It does not capture a Wayland desktop. On current Raspberry Pi OS releases, run `sudo raspi-config`, select `Advanced Options > Wayland > X11`, and reboot before installing if Wayland is enabled.
