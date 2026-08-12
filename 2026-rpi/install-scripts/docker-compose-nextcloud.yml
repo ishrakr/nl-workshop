@@ -4,46 +4,14 @@ services:
     ports:
       - "8080:80"
     environment:
-      MYSQL_HOST: database
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      REDIS_HOST: redis
-      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER}
-      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD}
+      SQLITE_DATABASE: nextcloud
+      NEXTCLOUD_ADMIN_USER: pi
+      NEXTCLOUD_ADMIN_PASSWORD: nlu@2026
       NEXTCLOUD_TRUSTED_DOMAINS: ${NEXTCLOUD_TRUSTED_DOMAINS}
       PHP_MEMORY_LIMIT: 128M
       PHP_UPLOAD_LIMIT: 2G
     volumes:
       - ${NEXTCLOUD_DIR}/html:/var/www/html
       - ${NEXTCLOUD_DIR}/data:/var/www/html/data
-    depends_on:
-      - database
-      - redis
     mem_limit: 512m
-    restart: unless-stopped
-
-  database:
-    image: docker.io/library/mariadb:11
-    command: >-
-      --transaction-isolation=READ-COMMITTED
-      --binlog-format=ROW
-      --innodb-buffer-pool-size=128M
-      --innodb-log-buffer-size=8M
-      --max-connections=30
-      --performance-schema=OFF
-    environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    volumes:
-      - ${NEXTCLOUD_DIR}/db:/var/lib/mysql
-    mem_limit: 256m
-    restart: unless-stopped
-
-  redis:
-    image: docker.io/library/redis:7-alpine
-    command: redis-server --save "" --appendonly no --maxmemory 32mb --maxmemory-policy allkeys-lru
-    mem_limit: 64m
     restart: unless-stopped

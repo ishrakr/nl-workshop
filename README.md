@@ -34,6 +34,8 @@ sudo mkdir -p /opt/raspberry-pi-workshop/nextcloud && cd /opt/raspberry-pi-works
 
 Open `http://<Pi-IP>:8080`
 
+Log in with username `pi` and password `nlu@2026`.
+
 ### RetroAssembly
 
 Play your own retro games in a browser.

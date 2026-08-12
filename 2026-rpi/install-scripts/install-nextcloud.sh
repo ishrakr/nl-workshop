@@ -20,24 +20,23 @@ if [[ ! -f "${compose_file}" ]]; then
   curl -fsSL "${compose_url}" -o "${compose_file}"
 fi
 
-install -d -m 0755 "${install_dir}/html" "${install_dir}/data" "${install_dir}/db" "${install_dir}/redis"
+nextcloud_config="${install_dir}/html/config/config.php"
+if { [[ -f "${nextcloud_config}" ]] && grep -Eq "['\"]dbtype['\"][[:space:]]*=>[[:space:]]*['\"](mysql|mysqli|pgsql|oci)['\"]" "${nextcloud_config}"; } ||
+  { [[ -f "${install_dir}/.env" ]] && grep -q '^MYSQL_' "${install_dir}/.env"; }; then
+  printf 'Existing Nextcloud installation uses an external database and cannot be changed to SQLite automatically.\n' >&2
+  printf 'Back it up and remove %s before running this installer for a fresh SQLite installation.\n' "${install_dir}" >&2
+  exit 1
+fi
+
+install -d -m 0755 "${install_dir}/html" "${install_dir}/data"
 install -m 0644 "${compose_file}" "${install_dir}/docker-compose.yml"
 
 if [[ ! -f "${install_dir}/.env" ]]; then
-  db_password="$(openssl rand -hex 24)"
-  root_password="$(openssl rand -hex 24)"
-  admin_password="$(openssl rand -hex 12)"
   read -r raspberry_pi_ip _ < <(hostname -I) || true
   raspberry_pi_ip="${raspberry_pi_ip:-localhost}"
   umask 077
   cat > "${install_dir}/.env" <<EOF
 NEXTCLOUD_DIR=${install_dir}
-MYSQL_DATABASE=nextcloud
-MYSQL_USER=nextcloud
-MYSQL_PASSWORD=${db_password}
-MYSQL_ROOT_PASSWORD=${root_password}
-NEXTCLOUD_ADMIN_USER=admin
-NEXTCLOUD_ADMIN_PASSWORD=${admin_password}
 NEXTCLOUD_TRUSTED_DOMAINS=localhost 127.0.0.1 ${raspberry_pi_ip}
 EOF
 fi
@@ -45,7 +44,8 @@ fi
 chmod 600 "${install_dir}/.env"
 cd "${install_dir}"
 docker compose pull
-docker compose up -d
+docker compose up -d --remove-orphans
 
 printf 'Nextcloud is running at http://<raspberry-pi-ip>:8080\n'
-printf 'Admin username and generated password: %s/.env\n' "${install_dir}"
+printf 'Admin username: pi\n'
+printf 'Admin password: nlu@2026\n'
