@@ -23,8 +23,11 @@ fi
 nextcloud_config="${install_dir}/html/config/config.php"
 if { [[ -f "${nextcloud_config}" ]] && grep -Eq "['\"]dbtype['\"][[:space:]]*=>[[:space:]]*['\"](mysql|mysqli|pgsql|oci)['\"]" "${nextcloud_config}"; } ||
   { [[ -f "${install_dir}/.env" ]] && grep -q '^MYSQL_' "${install_dir}/.env"; }; then
+  backup_dir="${install_dir}-mariadb-backup-$(date +%Y%m%d-%H%M%S)"
   printf 'Existing Nextcloud installation uses an external database and cannot be changed to SQLite automatically.\n' >&2
-  printf 'Back it up and remove %s before running this installer for a fresh SQLite installation.\n' "${install_dir}" >&2
+  printf 'For a fresh SQLite installation, stop it, preserve its files, and rerun the README command:\n' >&2
+  printf '  sudo docker compose -f %s/docker-compose.yml down\n' "${install_dir}" >&2
+  printf '  cd / && sudo mv %s %s\n' "${install_dir}" "${backup_dir}" >&2
   exit 1
 fi
 

@@ -36,6 +36,12 @@ Open `http://<Pi-IP>:8080`
 
 Log in with username `pi` and password `nlu@2026`.
 
+If an earlier MariaDB-based installation is detected, preserve it before rerunning the command:
+
+```bash
+sudo docker compose -f /opt/raspberry-pi-workshop/nextcloud/docker-compose.yml down && cd / && sudo mv /opt/raspberry-pi-workshop/nextcloud "/opt/raspberry-pi-workshop/nextcloud-mariadb-backup-$(date +%Y%m%d-%H%M%S)"
+```
+
 ### RetroAssembly
 
 Play your own retro games in a browser.
