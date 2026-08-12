@@ -14,11 +14,6 @@ if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>
   exit 1
 fi
 
-if [[ "$(dpkg --print-architecture)" != 'arm64' ]]; then
-  printf 'RetroAssembly requires a 64-bit Raspberry Pi OS installation (arm64).\n' >&2
-  exit 1
-fi
-
 if [[ ! -f "${compose_source}" ]]; then
   printf 'Compose file not found: %s\n' "${compose_source}" >&2
   exit 1

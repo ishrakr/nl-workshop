@@ -1,6 +1,6 @@
 # Raspberry Pi Workshop
 
-Easy installers for Raspberry Pi OS 64-bit.
+Easy installers for Raspberry Pi OS.
 
 Run the commands below in a terminal, one at a time.
 
