@@ -31,7 +31,7 @@ if [[ ! -f "${dockerfile}" ]]; then
   curl -fsSL "${base_url}/Dockerfile-web-vnc" -o "${dockerfile}"
 fi
 install -m 0644 "${compose_file}" "${install_dir}/docker-compose.yml"
-if [[ "${dockerfile}" != "${install_dir}/Dockerfile-web-vnc" ]]; then
+if [[ ! "${dockerfile}" -ef "${install_dir}/Dockerfile-web-vnc" ]]; then
   install -m 0644 "${dockerfile}" "${install_dir}/Dockerfile-web-vnc"
 else
   chmod 0644 "${dockerfile}"
