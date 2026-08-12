@@ -1,6 +1,6 @@
 FROM alpine:3.22
 
-RUN apk add --no-cache novnc x11vnc \
+RUN apk add --no-cache novnc x11vnc xauth \
     && ln -sf /usr/share/novnc/vnc.html /usr/share/novnc/index.html
 
 CMD ["sh", "-c", "x11vnc -display ${DISPLAY:-:0} -auth guess -forever -shared -nopw -localhost -rfbport 5900 -noxdamage -repeat -bg && exec websockify --web=/usr/share/novnc 0.0.0.0:6080 localhost:5900"]
