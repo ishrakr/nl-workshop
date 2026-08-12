@@ -17,12 +17,13 @@ if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>
   exit 1
 fi
 
-if [[ ! -S /tmp/.X11-unix/X0 ]]; then
-  printf 'No X11 desktop was found on display :0. Log in to the Pi desktop and ensure Raspberry Pi OS uses X11 rather than Wayland.\n' >&2
+if [[ ! -S /tmp/.X11-unix/X0 ]] || ! pgrep -x Xorg >/dev/null 2>&1; then
+  printf 'No X11 desktop was found on display :0. Log in to the Pi desktop and select X11 with sudo raspi-config (Advanced Options > Wayland > X11).\n' >&2
   exit 1
 fi
 
 install -d -m 0755 "${install_dir}"
+install_dir="$(cd -- "${install_dir}" && pwd)"
 if [[ ! -f "${compose_file}" ]]; then
   curl -fsSL "${base_url}/docker-compose-web-vnc.yml" -o "${compose_file}"
 fi
@@ -30,7 +31,11 @@ if [[ ! -f "${dockerfile}" ]]; then
   curl -fsSL "${base_url}/Dockerfile-web-vnc" -o "${dockerfile}"
 fi
 install -m 0644 "${compose_file}" "${install_dir}/docker-compose.yml"
-install -m 0644 "${dockerfile}" "${install_dir}/Dockerfile-web-vnc"
+if [[ "${dockerfile}" != "${install_dir}/Dockerfile-web-vnc" ]]; then
+  install -m 0644 "${dockerfile}" "${install_dir}/Dockerfile-web-vnc"
+else
+  chmod 0644 "${dockerfile}"
+fi
 
 cd "${install_dir}"
 docker compose up -d --build
