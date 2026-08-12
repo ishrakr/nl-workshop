@@ -49,7 +49,7 @@ Open `http://<Pi-IP>:8000`
 Play Doom in a browser.
 
 ```bash
-sudo mkdir -p /opt/raspberry-pi-workshop/doom && cd /opt/raspberry-pi-workshop/doom && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-doom.sh -o install-doom.sh && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/docker-compose-doom.yml -o docker-compose-doom.yml && sudo bash install-doom.sh
+sudo mkdir -p /opt/raspberry-pi-workshop/doom && cd /opt/raspberry-pi-workshop/doom && sudo curl -fsSL -H 'Cache-Control: no-cache' "https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-doom.sh?$(date +%s)" -o install-doom.sh && sudo curl -fsSL -H 'Cache-Control: no-cache' "https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/docker-compose-doom.yml?$(date +%s)" -o docker-compose-doom.yml && sudo bash install-doom.sh
 ```
 
 Open `http://<Pi-IP>:8081`
