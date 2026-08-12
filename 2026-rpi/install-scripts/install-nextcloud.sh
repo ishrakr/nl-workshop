@@ -35,12 +35,10 @@ install -d -m 0755 "${install_dir}/html" "${install_dir}/data"
 install -m 0644 "${compose_file}" "${install_dir}/docker-compose.yml"
 
 if [[ ! -f "${install_dir}/.env" ]]; then
-  read -r raspberry_pi_ip _ < <(hostname -I) || true
-  raspberry_pi_ip="${raspberry_pi_ip:-localhost}"
   umask 077
   cat > "${install_dir}/.env" <<EOF
 NEXTCLOUD_DIR=${install_dir}
-NEXTCLOUD_TRUSTED_DOMAINS=localhost 127.0.0.1 ${raspberry_pi_ip}
+NEXTCLOUD_TRUSTED_DOMAINS=localhost 127.0.0.1
 EOF
 fi
 
@@ -52,9 +50,12 @@ docker compose up -d --remove-orphans
 printf 'Waiting for Nextcloud to finish its first-time setup...\n'
 for _ in {1..90}; do
   container_id="$(docker compose ps -q nextcloud)"
-  if [[ -n "${container_id}" ]] && [[ "$(docker inspect -f '{{.State.OOMKilled}}' "${container_id}")" == true ]]; then
-    printf 'Nextcloud ran out of memory during setup. Ensure at least 1 GB of RAM or swap is available, then rerun this installer.\n' >&2
-    exit 1
+  if [[ -n "${container_id}" ]]; then
+    container_status="$(docker inspect -f '{{.State.Status}}' "${container_id}")"
+    if [[ "${container_status}" != running ]] && [[ "$(docker inspect -f '{{.State.OOMKilled}}' "${container_id}")" == true ]]; then
+      printf 'Nextcloud ran out of memory during setup. Ensure at least 1 GB of RAM or swap is available, then rerun this installer.\n' >&2
+      exit 1
+    fi
   fi
 
   if curl -fsS --max-time 5 http://127.0.0.1:8080/status.php 2>/dev/null | grep -q '"installed":true'; then
@@ -65,6 +66,40 @@ done
 
 if ! curl -fsS --max-time 5 http://127.0.0.1:8080/status.php 2>/dev/null | grep -q '"installed":true'; then
   printf 'Nextcloud did not become ready. Check the logs with: sudo docker compose -f %s/docker-compose.yml logs nextcloud\n' "${install_dir}" >&2
+  exit 1
+fi
+
+trusted_domains=(localhost 127.0.0.1 10.* 192.168.*)
+for subnet in {16..31}; do
+  trusted_domains+=("172.${subnet}.*")
+done
+read -ra host_addresses <<< "$(hostname -I 2>/dev/null || true)"
+for address in "${host_addresses[@]}"; do
+  if [[ "${address}" =~ ^[0-9A-Fa-f:.]+$ ]]; then
+    trusted_domains+=("${address}")
+  fi
+done
+
+lan_config="${install_dir}/html/config/lan.config.php"
+lan_config_tmp="${lan_config}.tmp"
+{
+  printf '<?php\n$CONFIG = [\n  '\''trusted_domains'\'' => [\n'
+  printf "    '%s',\n" "${trusted_domains[@]}"
+  printf '  ],\n];\n'
+} > "${lan_config_tmp}"
+chmod 0644 "${lan_config_tmp}"
+mv "${lan_config_tmp}" "${lan_config}"
+docker compose restart nextcloud >/dev/null
+
+for _ in {1..30}; do
+  if curl -fsS --max-time 5 http://127.0.0.1:8080/status.php 2>/dev/null | grep -q '"installed":true'; then
+    break
+  fi
+  sleep 2
+done
+
+if ! curl -fsS --max-time 5 http://127.0.0.1:8080/status.php 2>/dev/null | grep -q '"installed":true'; then
+  printf 'Nextcloud did not become ready after applying LAN access. Check the logs with: sudo docker compose -f %s/docker-compose.yml logs nextcloud\n' "${install_dir}" >&2
   exit 1
 fi
 
