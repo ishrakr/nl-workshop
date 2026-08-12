@@ -6,11 +6,8 @@ if [[ "${EUID}" -ne 0 ]]; then
   exit 1
 fi
 
-script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 install_dir="${WEB_VNC_DIR:-/opt/raspberry-pi-workshop/web-vnc}"
 base_url="https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts"
-compose_file="${script_dir}/docker-compose-web-vnc.yml"
-dockerfile="${script_dir}/Dockerfile-web-vnc"
 
 if ! command -v docker >/dev/null 2>&1 || ! docker compose version >/dev/null 2>&1; then
   printf 'Docker and the Docker Compose plugin are required. Run install-docker.sh first.\n' >&2
@@ -24,21 +21,17 @@ fi
 
 install -d -m 0755 "${install_dir}"
 install_dir="$(cd -- "${install_dir}" && pwd)"
-if [[ ! -f "${compose_file}" ]]; then
-  curl -fsSL "${base_url}/docker-compose-web-vnc.yml" -o "${compose_file}"
-fi
-if [[ ! -f "${dockerfile}" ]]; then
-  curl -fsSL "${base_url}/Dockerfile-web-vnc" -o "${dockerfile}"
-fi
-install -m 0644 "${compose_file}" "${install_dir}/docker-compose.yml"
-if [[ ! "${dockerfile}" -ef "${install_dir}/Dockerfile-web-vnc" ]]; then
-  install -m 0644 "${dockerfile}" "${install_dir}/Dockerfile-web-vnc"
-else
-  chmod 0644 "${dockerfile}"
-fi
+cache_buster="$(date +%s)"
+curl -fsSL -H 'Cache-Control: no-cache' "${base_url}/docker-compose-web-vnc.yml?${cache_buster}" -o "${install_dir}/docker-compose.yml"
+curl -fsSL -H 'Cache-Control: no-cache' "${base_url}/Dockerfile-web-vnc?${cache_buster}" -o "${install_dir}/Dockerfile-web-vnc"
+chmod 0644 "${install_dir}/docker-compose.yml" "${install_dir}/Dockerfile-web-vnc"
 
 cd "${install_dir}"
-docker compose up -d --build
+docker compose down --remove-orphans
+docker image rm raspberry-pi-workshop/web-vnc:latest >/dev/null 2>&1 || true
+docker compose build --no-cache
+docker compose run --rm --no-deps --entrypoint sh web-vnc -c 'command -v xauth >/dev/null'
+docker compose up -d --force-recreate
 
 raspberry_pi_ip="$(hostname -I | cut -d ' ' -f 1)"
 printf 'Unauthenticated browser access is available at http://%s:6080/vnc.html?autoconnect=1&resize=scale\n' "${raspberry_pi_ip:-<raspberry-pi-ip>}"

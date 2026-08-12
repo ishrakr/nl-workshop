@@ -43,7 +43,7 @@ Nextcloud will be available at `http://<raspberry-pi-ip>:8080`. The generated ad
 This installs a lightweight Alpine-based noVNC container that shares the Pi's existing X11 desktop in a browser. It works with Raspberry Pi OS Desktop when the Pi is logged in and the desktop uses X11. It does not capture a Wayland desktop. On current Raspberry Pi OS releases, run `sudo raspi-config`, select `Advanced Options > Wayland > X11`, and reboot before installing if Wayland is enabled.
 
 ```bash
-sudo mkdir -p /opt/raspberry-pi-workshop/web-vnc && cd /opt/raspberry-pi-workshop/web-vnc && sudo curl -fsSL -H 'Cache-Control: no-cache' "https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-web-vnc.sh?$(date +%s)" -o install-web-vnc.sh && sudo rm -f docker-compose-web-vnc.yml Dockerfile-web-vnc && sudo bash install-web-vnc.sh
+sudo mkdir -p /opt/raspberry-pi-workshop/web-vnc && cd /opt/raspberry-pi-workshop/web-vnc && sudo curl -fsSL -H 'Cache-Control: no-cache' "https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-web-vnc.sh?$(date +%s)" -o install-web-vnc.sh && sudo bash install-web-vnc.sh
 ```
 
 Open `http://<raspberry-pi-ip>:6080/vnc.html?autoconnect=1&resize=scale`.
