@@ -6,12 +6,10 @@ services:
     image: raspberry-pi-workshop/web-vnc:latest
     container_name: web_vnc
     network_mode: host
-    pid: host
     environment:
       DISPLAY: ${DISPLAY:-:0}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
       - /run:/run:ro
       - /home:/home:ro
-    mem_limit: 192m
     restart: unless-stopped
