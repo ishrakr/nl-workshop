@@ -1,76 +1,65 @@
 # Raspberry Pi Workshop
 
-Installation scripts for the 2026 Raspberry Pi workshop. The commands below use the `main` branch of this repository and install applications under `/opt/raspberry-pi-workshop`.
+Easy installers for Raspberry Pi OS 64-bit.
 
-Run each command as one line on a Raspberry Pi running Debian or Raspberry Pi OS 64-bit.
+Run the commands below in a terminal, one at a time.
 
-The default Compose files are tuned for low-memory systems. Immich machine learning is disabled by default because it is the largest memory consumer. To enable it, run `sudo IMMICH_ENABLE_ML=1 bash install-immich.sh` from the Immich directory. A 1 GB Pi should use at least 1 GB of swap; 2 GB is recommended when running both applications.
-
-## Docker
+## 1. Install Docker
 
 ```bash
 sudo mkdir -p /opt/raspberry-pi-workshop/docker && cd /opt/raspberry-pi-workshop/docker && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-docker.sh -o install-docker.sh && sudo bash install-docker.sh
 ```
 
-Log out and back in after installation so the Docker group membership takes effect.
+Log out and back in when it finishes.
 
-## Immich
+## 2. Choose Apps
+
+### Immich
+
+Photo library.
 
 ```bash
 sudo mkdir -p /opt/raspberry-pi-workshop/immich && cd /opt/raspberry-pi-workshop/immich && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-immich.sh -o install-immich.sh && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/docker-compose-immich.yml -o docker-compose-immich.yml && sudo bash install-immich.sh
 ```
 
-Immich will be available at `http://<raspberry-pi-ip>:2283`. Photos are stored in `/opt/raspberry-pi-workshop/immich/library`.
+Open `http://<Pi-IP>:2283`
 
-Immich's machine-learning features are disabled by default to reduce RAM usage. Face recognition, smart search, and similar features will not be available unless the ML profile is enabled.
+### Nextcloud
 
-If Immich is already installed, update its Compose file and restart PostgreSQL:
-
-```bash
-cd /opt/raspberry-pi-workshop/immich && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/docker-compose-immich.yml -o docker-compose.yml && sudo docker compose up -d --force-recreate database && sudo docker compose up -d
-```
-
-## Nextcloud
+Personal cloud storage.
 
 ```bash
 sudo mkdir -p /opt/raspberry-pi-workshop/nextcloud && cd /opt/raspberry-pi-workshop/nextcloud && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-nextcloud.sh -o install-nextcloud.sh && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/docker-compose-nextcloud.yml -o docker-compose-nextcloud.yml && sudo bash install-nextcloud.sh
 ```
 
-Nextcloud will be available at `http://<raspberry-pi-ip>:8080`. The generated administrator credentials are stored in `/opt/raspberry-pi-workshop/nextcloud/.env`.
+Open `http://<Pi-IP>:8080`
 
-## RetroAssembly
+### RetroAssembly
+
+Play your own retro games in a browser.
 
 ```bash
 sudo mkdir -p /opt/raspberry-pi-workshop/retroassembly && cd /opt/raspberry-pi-workshop/retroassembly && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-retroassembly.sh -o install-retroassembly.sh && sudo curl -fsSL https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/docker-compose-retroassembly.yml -o docker-compose-retroassembly.yml && sudo bash install-retroassembly.sh
 ```
 
-RetroAssembly will be available at `http://<raspberry-pi-ip>:8000`. Create an account from the Library page, then upload ROM files that you legally own. Game data, ROMs, and save states are stored in `/opt/raspberry-pi-workshop/retroassembly/data`.
+Open `http://<Pi-IP>:8000`
 
-## Browser GUI
+### Browser Desktop
 
-This installs a lightweight Alpine-based noVNC container that shares the Pi's existing X11 desktop in a browser. It works with Raspberry Pi OS Desktop when the Pi is logged in and the desktop uses X11. It does not capture a Wayland desktop. On current Raspberry Pi OS releases, run `sudo raspi-config`, select `Advanced Options > Wayland > X11`, and reboot before installing if Wayland is enabled.
+Control the Pi desktop from a browser.
+
+First run `sudo raspi-config`, then choose `Advanced Options > Wayland > X11` and reboot.
 
 ```bash
 sudo mkdir -p /opt/raspberry-pi-workshop/web-vnc && cd /opt/raspberry-pi-workshop/web-vnc && sudo curl -fsSL -H 'Cache-Control: no-cache' "https://raw.githubusercontent.com/ishrakr/nl-workshop/main/2026-rpi/install-scripts/install-web-vnc.sh?$(date +%s)" -o install-web-vnc.sh && sudo bash install-web-vnc.sh
 ```
 
-Open `http://<raspberry-pi-ip>:6080/vnc.html?autoconnect=1&resize=scale`.
+Open `http://<Pi-IP>:6080/vnc.html?autoconnect=1&resize=scale`
 
-This service intentionally has no authentication. Anyone who can reach port `6080` can view and control the Pi. Use it only on a trusted, isolated workshop network and stop it when it is not needed:
+Use Browser Desktop only on a trusted network. It has no password.
 
-```bash
-cd /opt/raspberry-pi-workshop/web-vnc && sudo docker compose down
-```
-
-## Service Commands
-
-Run these commands from the relevant installation directory:
+## Find Your Pi IP
 
 ```bash
-sudo docker compose ps
-sudo docker compose logs -f
-sudo docker compose down
-sudo docker compose up -d
+hostname -I
 ```
-
-Back up the application data directories and the `.env` file before reinstalling or changing storage.
