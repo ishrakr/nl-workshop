@@ -8,6 +8,7 @@ services:
     network_mode: host
     environment:
       DISPLAY: ${DISPLAY:-:0}
+      XAUTHORITY_FILE: ${XAUTHORITY_FILE:-/run/lightdm/root/:0}
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:ro
       - /run:/run:ro
