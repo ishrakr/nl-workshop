@@ -48,14 +48,15 @@ cache_buster="$(date +%s)"
 curl -fsSL -H 'Cache-Control: no-cache' "${base_url}/docker-compose-web-vnc.yml?${cache_buster}" -o "${install_dir}/docker-compose.yml"
 curl -fsSL -H 'Cache-Control: no-cache' "${base_url}/Dockerfile-web-vnc?${cache_buster}" -o "${install_dir}/Dockerfile-web-vnc"
 chmod 0644 "${install_dir}/docker-compose.yml" "${install_dir}/Dockerfile-web-vnc"
-printf 'XAUTHORITY_FILE=%s\n' "${xauthority_file}" > "${install_dir}/.env"
+image_tag="$(date +%s)"
+printf 'XAUTHORITY_FILE=%s\nWEB_VNC_IMAGE_TAG=%s\n' "${xauthority_file}" "${image_tag}" > "${install_dir}/.env"
 
 cd "${install_dir}"
 docker compose down --remove-orphans
-docker image rm raspberry-pi-workshop/web-vnc:latest >/dev/null 2>&1 || true
 docker compose build --no-cache
 docker compose run --rm --no-deps --entrypoint sh web-vnc -c 'command -v xauth >/dev/null'
 docker compose up -d --force-recreate
+docker image prune -f >/dev/null
 
 raspberry_pi_ip="$(hostname -I | cut -d ' ' -f 1)"
 printf 'Unauthenticated browser access is available at http://%s:6080/vnc.html?autoconnect=1&resize=scale\n' "${raspberry_pi_ip:-<raspberry-pi-ip>}"

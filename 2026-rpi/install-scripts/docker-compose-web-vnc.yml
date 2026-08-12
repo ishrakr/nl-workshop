@@ -3,9 +3,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-web-vnc
-    image: raspberry-pi-workshop/web-vnc:latest
+    image: raspberry-pi-workshop/web-vnc:${WEB_VNC_IMAGE_TAG:-latest}
     container_name: web_vnc
     network_mode: host
+    command:
+      - sh
+      - -c
+      - >-
+        test -f "$${XAUTHORITY_FILE}" || { echo "X11 authorization file not found: $${XAUTHORITY_FILE}" >&2; exit 1; };
+        x11vnc -display "$${DISPLAY:-:0}" -auth "$${XAUTHORITY_FILE}" -forever -shared -nopw -localhost -rfbport 5900 -noxdamage -repeat -bg &&
+        exec websockify --web=/usr/share/novnc 0.0.0.0:6080 localhost:5900
     environment:
       DISPLAY: ${DISPLAY:-:0}
       XAUTHORITY_FILE: ${XAUTHORITY_FILE:-/run/lightdm/root/:0}
